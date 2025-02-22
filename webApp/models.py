@@ -31,6 +31,7 @@ class Sale(models.Model):
     totalAmount = models.FloatField()
     paymentMethod = models.CharField(max_length= 100)
 
+
 class Bill(models.Model):
     sale = models.ForeignKey(Sale,on_delete=models.CASCADE)
     billDetails = models.TextField()
