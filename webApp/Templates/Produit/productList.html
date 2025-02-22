@@ -1,0 +1,32 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h1 class="mb-4">Liste des Produits</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nom du Produit</th>
+                    <th>Catégorie</th>
+                    <th>Quantité en Stock</th>
+                    <th>Prix</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prod in prod %}
+                <tr>
+                    <td>{{ prod.nom }}</td>
+                    <td>{{ prod.categorie }}</td>
+                    <td>{{ prod.quantite_en_stock }}</td>
+                    <td>{{ prod.prix }} CFA</td>
+                    <td>
+                        <button class="btn btn-primary">Ajouter au panier</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-4">
+            <p>Pas satisfait de la sélection ? <a href="{% url 'addProduct' %}">Cliquez ici pour ajouter de nouveaux produits</a></p>
+        </div>
+{% endblock %}

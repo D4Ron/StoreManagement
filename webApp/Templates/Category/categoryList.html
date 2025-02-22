@@ -1,0 +1,28 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h1 class="mb-4">Voici les categories de produits disponible dans notre magasin</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nom de la Catégorie</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in cat %}
+                <tr>
+                    <td>{{ cat.id }}</td>
+                    <td>{{ cat.name }}</td>
+                    <td>
+                        <button class="btn btn-primary">Ajouter au panier</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-4">
+            <p>Pas satisfait de la sélection ? <a href="{% url 'addCategory' %}">Cliquez ici pour ajouter de nouvelles catégories</a></p>
+        </div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from webApp import models
-from webApp.forms import ProductForm,CategoryForm
+from .forms import ProductForm,CategoryForm
 
 #Method to display the index page(Home page)
 def index(request):
@@ -13,7 +13,7 @@ def index(request):
 def productList(request):
     products = models.Product.objects.all()
     context = {'prod':products}
-    return render(request,"productList.html",context)
+    return render(request,"Produit/productList.html",context)
 
 #Method to display the add product page(It verifies the form and saves the product)
 def addProduct(request):
@@ -28,17 +28,20 @@ def addProduct(request):
             isAvailable = form.cleaned_data['isAvailable']
             product = models.Product(name=name,category=category,quantityInStock=quantityInStock,price=price,isAvailable=isAvailable)
             product.save()
-            redirect('productList')
+            redirect('Produit/productList')
     else:
         form = ProductForm()
-    return render(request, "addProduct.html", {'cat': categories, 'form': form})
+        
+    return render(request, "Produit/addProduct.html", {'cat': categories, 'form': form})
 
+#Method to display the list of categories
 def categoryList(request):
     categories = models.Category.objects.all()
     products = models.Product.objects.all()
     context = {'cat':categories,'prod':products}
-    return render(request,"categoryList.html",context)
+    return render(request,"Category/categoryList.html",context)
 
+#Method to display the add category page(It verifies the form and saves the category)
 def addCategory(request):
     if request.method == "POST":
         form = CategoryForm(request.POST)
@@ -46,7 +49,13 @@ def addCategory(request):
             name = form.cleaned_data['name']
             category = models.Category(name=name)
             category.save()
-            redirect('categoryList')
+            redirect('Category/categoryList')
     else:
         form = CategoryForm()
-    return render(request, "addCategory.html", {'form': form})
+    return render(request, "Category/addCategory.html", {'form': form})
+
+#Method to display Mobile Money Service page
+def mobileMoneyService(request):
+    services = models.MobileMoneyService.objects.all()
+    context = {'services':services}
+    return render(request,"mobileMoneyService.html",context)
