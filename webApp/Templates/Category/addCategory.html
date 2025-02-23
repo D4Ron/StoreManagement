@@ -5,7 +5,10 @@
 
 <form action="{% url 'addCategory' %}" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    <div class="form-group">
+        <label for="id_name">Nom de la Catégorie:</label>
+        <input type="text" class="form-control" id="id_name" name="name" maxlength="50" required>
+    </div>
     <button class="btn btn-primary" type="submit">Ajouter</button>
 </form>
 {% endblock %}

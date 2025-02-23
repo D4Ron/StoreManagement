@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from webApp import models
-from .forms import ProductForm,CategoryForm
+from .forms import ProductForm,CategoryForm,MobileMoneyServiceForm
+from django.db.models import Sum
 
 #Method to display the index page(Home page)
 def index(request):
@@ -28,11 +29,17 @@ def addProduct(request):
             isAvailable = form.cleaned_data['isAvailable']
             product = models.Product(name=name,category=category,quantityInStock=quantityInStock,price=price,isAvailable=isAvailable)
             product.save()
-            redirect('Produit/productList')
+            redirect('productList')
     else:
         form = ProductForm()
         
     return render(request, "Produit/addProduct.html", {'cat': categories, 'form': form})
+
+#Method to delete a product
+def deleteProduct(request, productId):
+    product = models.Product.objects.get(id=productId)
+    product.delete()
+    return redirect('productList')
 
 #Method to display the list of categories
 def categoryList(request):
@@ -40,6 +47,13 @@ def categoryList(request):
     products = models.Product.objects.all()
     context = {'cat':categories,'prod':products}
     return render(request,"Category/categoryList.html",context)
+
+#Method to display the list of products in a category
+def categoryProduct(request,categoryId):
+    category = models.Category.objects.get(id=categoryId)
+    products = models.Product.objects.filter(category=category)
+    context = {'cat':category,'prod':products}
+    return render(request,"Category/categoryProduct.html",context)
 
 #Method to display the add category page(It verifies the form and saves the category)
 def addCategory(request):
@@ -49,13 +63,111 @@ def addCategory(request):
             name = form.cleaned_data['name']
             category = models.Category(name=name)
             category.save()
-            redirect('Category/categoryList')
+            redirect('categoryList')
     else:
         form = CategoryForm()
     return render(request, "Category/addCategory.html", {'form': form})
 
 #Method to display Mobile Money Service page
-def mobileMoneyService(request):
-    services = models.MobileMoneyService.objects.all()
-    context = {'services':services}
-    return render(request,"mobileMoneyService.html",context)
+def mobileMoneyServicePage(request):
+    if request.method == 'POST':
+        form = MobileMoneyServiceForm(request.POST)
+        if form.is_valid():
+            serviceName = form.cleaned_data['serviceName']
+            transactionId = form.cleaned_data['transactionId']
+            amount = form.cleaned_data['amount']
+            transactionDate = form.cleaned_data['transactionDate']
+            mobileNumber = form.cleaned_data['mobileNumber']
+
+            models.MobileMoneyService.objects.create(
+                serviceName=serviceName,
+                transactionId=transactionId,
+                amount=amount,
+                transactionDate=transactionDate,
+                mobileNumber=mobileNumber
+            )
+            return redirect('mobileMoneyService')
+    else:
+        form = MobileMoneyServiceForm()
+
+    transactions = models.MobileMoneyService.objects.all().order_by('-transactionDate')
+    context = {
+        'form': form,
+        'services': models.MobileMoneyService.SERVICE_CHOICES,
+        'transactionTypes': models.MobileMoneyService.TRANSACTION_TYPE,
+        'transactions': transactions
+    }
+    return render(request, "MobileMoney/mobileMoneyService.html", context)
+
+#Method to delete a category
+def deleteCategory(request, categoryId):
+    category = models.Category.objects.get(id=categoryId)
+    category.delete()
+    return redirect('categoryList')
+
+# Add product to basket
+def addToBasket(request, productId):
+    product = models.Product.objects.get(id=productId)
+    sessionKey = request.session.session_key
+    if not sessionKey:
+        request.session.create()
+        sessionKey = request.session.session_key
+
+    basket, created = models.Basket.objects.get_or_create(sessionKey=sessionKey)
+    basketItem, created = models.BasketItem.objects.get_or_create(basket=basket, product=product)
+    if not created:
+        basketItem.quantity += 1
+    basketItem.save()
+    return redirect('productList')
+
+# View basket items
+def viewBasket(request):
+    sessionKey = request.session.session_key
+    if not sessionKey:
+        return render(request, 'basket.html', {'items': []})
+
+    basket = models.Basket.objects.filter(sessionKey=sessionKey).first()
+    items = models.BasketItem.objects.filter(basket=basket) if basket else []
+    context = {'items': items}
+    return render(request, 'basket.html', context)
+
+# Checkout and generate bill
+def checkout(request):
+    sessionKey = request.session.session_key
+    basket = models.Basket.objects.filter(sessionKey=sessionKey).first()
+
+    if not basket:
+        return redirect('viewBasket')
+
+    totalAmount = 0
+    basketItems = models.BasketItem.objects.filter(basket=basket)
+    for item in basketItems:
+        totalAmount += item.product.price * item.quantity
+
+    sale = models.Sale.objects.create(basket=basket, totalAmount=totalAmount, paymentMethod="Cash")
+    for item in basketItems:
+        models.SaleItem.objects.create(sale=sale, product=item.product, quantity=item.quantity, unitPrice=item.product.price)
+    
+    billDetails = '\n'.join([f"{item.product.name} x {item.quantity} = {item.product.price * item.quantity}" for item in basketItems])
+    models.Bill.objects.create(sale=sale, billDetails=billDetails)
+
+    basketItems.delete()  
+    return redirect('viewBasket')
+
+#Name is self-explanatory but it displays the statistics page
+def statisticsPage(request):
+    
+    purchaseHistory = models.SaleItem.objects.select_related('sale', 'product').all().order_by('-sale__saleDate')
+    
+    
+    remainingStock = models.Product.objects.all()
+    
+   
+    totalSales = models.Sale.objects.aggregate(total=Sum('totalAmount'))['total'] or 0
+    
+    context = {
+        'purchaseHistory': purchaseHistory,
+        'remainingStock': remainingStock,
+        'totalSales': totalSales
+    }
+    return render(request, "statistics.html", context)

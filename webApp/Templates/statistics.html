@@ -1,0 +1,45 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h2>Statistiques</h2>
+
+<h3>Historique des Achats</h3>
+<table border="1">
+    <tr>
+        <th>Date</th>
+        <th>Produit</th>
+        <th>Quantité</th>
+        <th>Prix Unitaire (CFA)</th>
+        <th>Total</th>
+    </tr>
+    {% for item in purchaseHistory %}
+    <tr>
+        <td>{{ item.sale.saleDate }}</td>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.unitPrice }} CFA</td>
+        <td>{{ item.unitPrice|floatformat:2 }} x {{ item.quantity }} = {{ item.unitPrice|floatformat:2|add:item.quantity }} CFA</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Stock Restant</h3>
+<table border="1">
+    <tr>
+        <th>Produit</th>
+        <th>Quantité en Stock</th>
+        <th>Prix (CFA)</th>
+    </tr>
+    {% for product in remainingStock %}
+    <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.quantityInStock }}</td>
+        <td>{{ product.price }} CFA</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Ventes Totales: {{ totalSales }} CFA</h3>
+
+<a href="{% url 'index' %}">Aller à l'accueil</a>
+{% endblock %}

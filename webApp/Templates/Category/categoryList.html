@@ -16,7 +16,8 @@
                     <td>{{ cat.id }}</td>
                     <td>{{ cat.name }}</td>
                     <td>
-                        <button class="btn btn-primary">Ajouter au panier</button>
+                        <a href="{% url 'categoryProduct' cat.id %}" class="btn btn-primary">Voir les produits</a>
+                        <a href="{% url 'deleteCategory' cat.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this category?');">Supprimer</a>
                     </td>
                 </tr>
                 {% endfor %}

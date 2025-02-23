@@ -1,0 +1,64 @@
+{% extends "main.html" %}
+
+{% block content %}
+    <h1>Service Mobile Money</h1>
+    
+    <form method="POST" onsubmit="alert('La transaction a été effectuée avec succès');">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="serviceName">Nom du Service:</label>
+            <select class="form-control" name="serviceName" required>
+                <option value="Flooz">Flooz</option>
+                <option value="TMoney">TMoney</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="transactionType">Type de Transaction:</label>
+            <select class="form-control" name="transactionType" required>
+                <option value="Send">Envoyer</option>
+                <option value="Withdraw">Retirer</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="amount">Montant:</label>
+            <input type="number" class="form-control" name="amount" step="0.01" required>
+        </div>
+        <div class="form-group">
+            <label for="transactionDate">Date de Transaction:</label>
+            <input type="date" class="form-control" name="transactionDate" required>
+        </div>
+        <div class="form-group">
+            <label for="mobileNumber">Numéro de Mobile:</label>
+            <input type="text" class="form-control" name="mobileNumber" required>
+        </div>
+        <input type="hidden" name="transactionId" value="{{ random_transaction_id }}">
+        <button type="submit" class="btn btn-success">Soumettre</button>
+    </form>
+
+    <h2>Historique des transactions</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom du Service</th>
+                <th>Type de Transaction</th>
+                <th>ID de Transaction</th>
+                <th>Montant</th>
+                <th>Date de Transaction</th>
+                <th>Numéro de Mobile</th> 
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.serviceName }}</td>
+                <td>{{ transaction.transactionType }}</td>
+                <td>{{ transaction.transactionId }}</td>
+                <td>{{ transaction.amount }} CFA</td>
+                <td>{{ transaction.transactionDate }}</td>
+                <td>{{ transaction.mobileNumber }}</td> 
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+{% endblock %}

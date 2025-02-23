@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+
+{% block content %}
+<h1>Panier</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix Unitaire</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.product.name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.product.price }} CFA</td>
+            <td>{{ item.product.price|floatformat:2|add:item.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'productList' %}" class="btn btn-secondary">Continuer vos achats</a>
+<a href="{% url 'checkout' %}" class="btn btn-primary">Valider votre commande</a>
+{% endblock %}
