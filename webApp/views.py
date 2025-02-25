@@ -131,6 +131,7 @@ def viewBasket(request):
     context = {'items': items}
     return render(request, 'basket.html', context)
 
+
 # Checkout and generate bill
 def checkout(request):
     sessionKey = request.session.session_key
@@ -141,8 +142,21 @@ def checkout(request):
 
     totalAmount = 0
     basketItems = models.BasketItem.objects.filter(basket=basket)
+    
+    # Check if all items are available in stock
+    for item in basketItems:
+        if item.quantity > item.product.quantityInStock:
+            return render(request, 'basket.html', {
+                'items': basketItems,
+                'error_message': f"Not enough stock for {item.product.name}"
+            })
+
+    # Proceed with checkout
     for item in basketItems:
         totalAmount += item.product.price * item.quantity
+        # Deduct quantity from stock
+        item.product.quantityInStock -= item.quantity
+        item.product.save()
 
     sale = models.Sale.objects.create(basket=basket, totalAmount=totalAmount, paymentMethod="Cash")
     for item in basketItems:
@@ -153,6 +167,7 @@ def checkout(request):
 
     basketItems.delete()  
     return redirect('viewBasket')
+
 
 #Name is self-explanatory but it displays the statistics page
 def statisticsPage(request):
@@ -171,3 +186,12 @@ def statisticsPage(request):
         'totalSales': totalSales
     }
     return render(request, "statistics.html", context)
+
+def searchProducts(request):
+    query = request.GET.get('q')
+    if query:
+        products = models.Product.objects.filter(name__icontains=query)
+    else:
+        products = models.Product.objects.all()
+    context = {'prod': products, 'query': query}
+    return render(request, 'Produit/searchResults.html', context)

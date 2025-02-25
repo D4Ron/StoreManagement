@@ -1,0 +1,29 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Résultats de recherche</h2>
+    <div class="row">
+        {% for product in prod %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-success font-weight-bold">{{ product.price }} FCFA</p>
+                    <a href="{% url 'productList' %}" class="btn btn-primary">Voir Détails</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center" role="alert">
+                Aucun produit trouvé.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'productList' %}" class="btn btn-secondary">Retour aux produits</a>
+    </div>
+</div>
+{% endblock %}

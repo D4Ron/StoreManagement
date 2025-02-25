@@ -1,1 +1,27 @@
 {% extends "main.html" %}
+
+{% block content %}
+    <h1>Accueil</h1>
+    <p>Bienvenue sur notre site!</p>
+    <p>Vous pouvez consulter la liste des <a href="{% url 'productList' %}">produits</a> disponibles.</p>
+    
+    <h2>Navigation</h2>
+    <ul>
+        <li><a href="{% url 'categoryList' %}">Voir les catégories de produits</a></li>
+        <li><a href="{% url 'productList' %}">Voir la liste des produits</a></li>
+        <li><a href="{% url 'viewBasket' %}">Voir le panier</a></li>
+        <li><a href="{% url 'checkout' %}">Passer à la caisse</a></li>
+        <li><a href="{% url 'mobileMoneyService' %}">Service Mobile Money</a></li>
+        <li><a href="{% url 'statisticsPage' %}">Voir les statistiques</a></li>
+    </ul>
+
+    <h2>Ce que vous pouvez faire sur notre site</h2>
+    <p>Sur notre site, vous pouvez :</p>
+    <ul>
+        <li>Consulter la liste des <a href="{% url 'productList' %}">produits</a> disponibles dans notre magasin.</li>
+        <li>Voir les différentes <a href="{% url 'categoryList' %}">catégories de produits</a>.</li>
+        <li>Ajouter des produits à votre <a href="{% url 'viewBasket' %}">panier</a> et <a href="{% url 'checkout' %}">passer à la caisse</a>.</li>
+        <li>Utiliser notre <a href="{% url 'mobileMoneyService' %}">service Mobile Money</a> pour effectuer des transactions.</li>
+        <li>Voir les <a href="{% url 'statisticsPage' %}">statistiques</a> de notre magasin pour avoir un aperçu des ventes et du stock.</li>
+    </ul>
+{% endblock %}

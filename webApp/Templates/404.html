@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Non Trouvée</title>
+    <style>
+        .container {
+            background-color: rgba(0, 0, 0, 0.5); 
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Page Non Trouvée</h1>
+        <p>La page que vous recherchez n'existe pas. Vous serez redirigé vers la page d'accueil.</p>
+        <script>
+            setTimeout(function() {
+                window.location.href = "{% url 'index' %}";
+            }, 3000); // Rediriger l'utilisateur après environ 3 secondes
+        </script>
+    </div>
+</body>
+</html>

@@ -15,5 +15,6 @@ urlpatterns = [
     path('mobile-money/', views.mobileMoneyServicePage, name='mobileMoneyService'),
     path('deleteProduct/<int:productId>/', views.deleteProduct, name='deleteProduct'),
     path('deleteCategory/<int:categoryId>/', views.deleteCategory, name='deleteCategory'),
+    path('search/', views.searchProducts, name='searchProducts'),
 
 ]
