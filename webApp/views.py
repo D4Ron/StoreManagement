@@ -1,61 +1,68 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from webApp import models
-from .forms import ProductForm,CategoryForm,MobileMoneyServiceForm
+from .forms import ProductForm, CategoryForm, MobileMoneyServiceForm
 from django.db.models import Sum
 
-#Method to display the index page(Home page)
+# Method to display the index page(Home page)
 def index(request):
     products = models.Product.objects.all()
     categories = models.Category.objects.all()
-    context = {'prod':products,'cat':categories}
-    return render(request,"index.html",context)
+    context = {'prod': products, 'cat': categories}
+    return render(request, "index.html", context)
 
-#Method to display the product list page
+# Method to display the product list page
 def productList(request):
     products = models.Product.objects.all()
-    context = {'prod':products}
-    return render(request,"Produit/productList.html",context)
+    context = {'prod': products}
+    return render(request, "Produit/productList.html", context)
 
-#Method to display the add product page(It verifies the form and saves the product)
+# Method to display the add product page(It verifies the form and saves the product)
 def addProduct(request):
     categories = models.Category.objects.all()
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
+            if models.Product.objects.filter(name=name).exists():
+                return render(request, "Produit/addProduct.html", {'cat': categories, 'form': form, 'error_message': 'Product already exists'})
+            elif len(name) < 3:
+                return render(request, "Produit/addProduct.html", {'cat': categories, 'form': form, 'error_message': 'Name must be at least 3 characters long'})
             category = form.cleaned_data['category']
             quantityInStock = form.cleaned_data['quantityInStock']
+            if quantityInStock < 0:
+                return render(request, "Produit/addProduct.html", {'cat': categories, 'form': form, 'error_message': 'Quantity in stock must be greater than 0'})
             price = form.cleaned_data['price']
+            if price < 0:
+                return render(request, "Produit/addProduct.html", {'cat': categories, 'form': form, 'error_message': 'Price must be greater than 0'})
             isAvailable = form.cleaned_data['isAvailable']
-            product = models.Product(name=name,category=category,quantityInStock=quantityInStock,price=price,isAvailable=isAvailable)
+            product = models.Product(name=name, category=category, quantityInStock=quantityInStock, price=price, isAvailable=isAvailable)
             product.save()
-            redirect('productList')
+            return redirect('productList')
     else:
         form = ProductForm()
-        
     return render(request, "Produit/addProduct.html", {'cat': categories, 'form': form})
 
-#Method to delete a product
+# Method to delete a product
 def deleteProduct(request, productId):
     product = models.Product.objects.get(id=productId)
     product.delete()
     return redirect('productList')
 
-#Method to display the list of categories
+# Method to display the list of categories
 def categoryList(request):
     categories = models.Category.objects.all()
     products = models.Product.objects.all()
-    context = {'cat':categories,'prod':products}
-    return render(request,"Category/categoryList.html",context)
+    context = {'cat': categories, 'prod': products}
+    return render(request, "Category/categoryList.html", context)
 
-#Method to display the list of products in a category
-def categoryProduct(request,categoryId):
+# Method to display the list of products in a category
+def categoryProduct(request, categoryId):
     category = models.Category.objects.get(id=categoryId)
     products = models.Product.objects.filter(category=category)
-    context = {'cat':category,'prod':products}
-    return render(request,"Category/categoryProduct.html",context)
+    context = {'cat': category, 'prod': products}
+    return render(request, "Category/categoryProduct.html", context)
 
-#Method to display the add category page(It verifies the form and saves the category)
+# Method to display the add category page(It verifies the form and saves the category)
 def addCategory(request):
     if request.method == "POST":
         form = CategoryForm(request.POST)
@@ -63,12 +70,12 @@ def addCategory(request):
             name = form.cleaned_data['name']
             category = models.Category(name=name)
             category.save()
-            redirect('categoryList')
+            return redirect('categoryList')
     else:
         form = CategoryForm()
     return render(request, "Category/addCategory.html", {'form': form})
 
-#Method to display Mobile Money Service page
+# Method to display Mobile Money Service page
 def mobileMoneyServicePage(request):
     if request.method == 'POST':
         form = MobileMoneyServiceForm(request.POST)
@@ -76,6 +83,8 @@ def mobileMoneyServicePage(request):
             serviceName = form.cleaned_data['serviceName']
             transactionId = form.cleaned_data['transactionId']
             amount = form.cleaned_data['amount']
+            if amount < 0:
+                return render(request, "MobileMoney/mobileMoneyService.html", {'form': form, 'error_message': 'Amount must be greater than 0'})
             transactionDate = form.cleaned_data['transactionDate']
             mobileNumber = form.cleaned_data['mobileNumber']
 
@@ -99,7 +108,7 @@ def mobileMoneyServicePage(request):
     }
     return render(request, "MobileMoney/mobileMoneyService.html", context)
 
-#Method to delete a category
+# Method to delete a category
 def deleteCategory(request, categoryId):
     category = models.Category.objects.get(id=categoryId)
     category.delete()
@@ -130,7 +139,6 @@ def viewBasket(request):
     items = models.BasketItem.objects.filter(basket=basket) if basket else []
     context = {'items': items}
     return render(request, 'basket.html', context)
-
 
 # Checkout and generate bill
 def checkout(request):
@@ -168,16 +176,10 @@ def checkout(request):
     basketItems.delete()  
     return redirect('viewBasket')
 
-
-#Name is self-explanatory but it displays the statistics page
+# Name is self-explanatory but it displays the statistics page
 def statisticsPage(request):
-    
     purchaseHistory = models.SaleItem.objects.select_related('sale', 'product').all().order_by('-sale__saleDate')
-    
-    
     remainingStock = models.Product.objects.all()
-    
-   
     totalSales = models.Sale.objects.aggregate(total=Sum('totalAmount'))['total'] or 0
     
     context = {
@@ -190,7 +192,7 @@ def statisticsPage(request):
 def searchProducts(request):
     query = request.GET.get('q')
     if query:
-        products = models.Product.objects.filter(name__icontains=query)
+        products = models.Product.objects.filter(name__icontains(query))
     else:
         products = models.Product.objects.all()
     context = {'prod': products, 'query': query}
