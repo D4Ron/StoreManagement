@@ -189,10 +189,11 @@ def statisticsPage(request):
     }
     return render(request, "statistics.html", context)
 
+#Method to search products
 def searchProducts(request):
     query = request.GET.get('q')
     if query:
-        products = models.Product.objects.filter(name__icontains(query))
+        products = models.Product.objects.filter(name__icontains=query)
     else:
         products = models.Product.objects.all()
     context = {'prod': products, 'query': query}
